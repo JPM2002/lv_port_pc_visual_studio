@@ -1,10 +1,11 @@
 ﻿#include "lvgl/lvgl.h"
 #include "ui.h"
-#include "top_bar.h"  // Include Top Bar
+#include "top_bar.h"
+#include "now_playing_screen.h"
+
 
 // Forward declarations
 void ui_show_main_menu(void);
-void ui_show_now_playing(void);
 void ui_show_boot_screen(void);
 
 // === Global TopBarContext ===
@@ -13,10 +14,6 @@ static TopBarContext global_top_bar_ctx;
 // === Battery simulation (mock) ===
 static int read_battery_percent(void)
 {
-    //static int mock_percent = 0;
-    //mock_percent += 1;
-    //if (mock_percent > 100) mock_percent = 0;
-    //return mock_percent;
     return 80;
 }
 
@@ -30,7 +27,7 @@ static void battery_update_timer_cb(lv_timer_t* t)
 // === C Callbacks ===
 static void now_playing_btn_event_cb(lv_event_t* e)
 {
-    ui_show_now_playing();
+    now_playing_screen_show();
 }
 
 static void boot_screen_timer_cb(lv_timer_t* t)
@@ -57,7 +54,7 @@ void ui_show_boot_screen(void)
 
     // Add Top Bar → assign to global
     global_top_bar_ctx = top_bar_create(scr);
-    top_bar_set_battery_percent(&global_top_bar_ctx, read_battery_percent());  // <== ADD THIS
+    top_bar_set_battery_percent(&global_top_bar_ctx, read_battery_percent());
 
     // Logo / Title
     lv_obj_t* title = lv_label_create(scr);
@@ -81,91 +78,41 @@ void ui_show_main_menu(void)
     lv_obj_t* scr = lv_obj_create(NULL);
     lv_scr_load(scr);
 
-    // Add Top Bar → assign to global
+    // Add Top Bar
     global_top_bar_ctx = top_bar_create(scr);
-    top_bar_set_battery_percent(&global_top_bar_ctx, read_battery_percent());  // ADD THIS
+    top_bar_set_battery_percent(&global_top_bar_ctx, read_battery_percent());
 
-    // Title label
-    lv_obj_t* title = lv_label_create(scr);
-    lv_label_set_text(title, "DIY iPod Player");
-    lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 30);  // move down a bit below Top Bar
+    // Create List
+    lv_obj_t* list = lv_list_create(scr);
+    lv_obj_set_size(list, 312, 180);  // full width, adjust height to fit screen below Top Bar
+    lv_obj_align(list, LV_ALIGN_TOP_MID, 0, 24);  // below top bar (TopBar height ≈ 24px)
 
-    // Now Playing button
-    lv_obj_t* btn_now_playing = lv_btn_create(scr);
-    lv_obj_set_size(btn_now_playing, 150, 40);
-    lv_obj_align(btn_now_playing, LV_ALIGN_CENTER, 0, -50);
-    lv_obj_t* label_now_playing = lv_label_create(btn_now_playing);
-    lv_label_set_text(label_now_playing, "Now Playing");
-    lv_obj_add_event_cb(btn_now_playing, now_playing_btn_event_cb, LV_EVENT_CLICKED, NULL);
+    // OPTIONAL → Style the selected item (yellow highlight)
+    static lv_style_t style_selected;
+    lv_style_init(&style_selected);
+    lv_style_set_bg_color(&style_selected, lv_color_hex(0xFFD700));  // Yellow
+    lv_style_set_text_color(&style_selected, lv_color_hex(0x000000));  // Black text
 
-    // Browse Music button
-    lv_obj_t* btn_browse = lv_btn_create(scr);
-    lv_obj_set_size(btn_browse, 150, 40);
-    lv_obj_align(btn_browse, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_t* label_browse = lv_label_create(btn_browse);
-    lv_label_set_text(label_browse, "Browse Music");
+    // Add List Buttons
+    lv_obj_t* btn_files = lv_list_add_btn(list, LV_SYMBOL_FILE, "Files");
+    lv_obj_add_event_cb(btn_files, now_playing_btn_event_cb, LV_EVENT_CLICKED, NULL);  // TEMP action
 
-    // Settings button
-    lv_obj_t* btn_settings = lv_btn_create(scr);
-    lv_obj_set_size(btn_settings, 150, 40);
-    lv_obj_align(btn_settings, LV_ALIGN_CENTER, 0, 50);
-    lv_obj_t* label_settings = lv_label_create(btn_settings);
-    lv_label_set_text(label_settings, "Settings");
-}
+    lv_obj_t* btn_database = lv_list_add_btn(list, LV_SYMBOL_AUDIO, "Database");
 
-// === Now Playing ===
-void ui_show_now_playing(void)
-{
-    lv_obj_t* scr = lv_obj_create(NULL);
-    lv_scr_load(scr);
+    lv_obj_t* btn_resume = lv_list_add_btn(list, LV_SYMBOL_PLAY, "Resume Playback");
 
-    // Add Top Bar → assign to global
-    global_top_bar_ctx = top_bar_create(scr);
+    lv_obj_t* btn_settings = lv_list_add_btn(list, LV_SYMBOL_SETTINGS, "Settings");
 
-    // Title
-    lv_obj_t* title = lv_label_create(scr);
-    lv_label_set_text(title, "Now Playing");
-    lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 30);  // move down a bit below Top Bar
+    lv_obj_t* btn_recording = lv_list_add_btn(list, LV_SYMBOL_VIDEO, "Recording");
 
-    // Album Art placeholder
-    lv_obj_t* album_art = lv_obj_create(scr);
-    lv_obj_set_size(album_art, 100, 100);
-    lv_obj_align(album_art, LV_ALIGN_TOP_LEFT, 20, 70);
+    lv_obj_t* btn_fm_radio = lv_list_add_btn(list, LV_SYMBOL_BELL, "FM Radio");
 
-    // Song Title
-    lv_obj_t* song_title = lv_label_create(scr);
-    lv_label_set_text(song_title, "Song Title - Example");
-    lv_obj_align(song_title, LV_ALIGN_TOP_LEFT, 140, 80);
+    lv_obj_t* btn_playlists = lv_list_add_btn(list, LV_SYMBOL_LIST, "Playlists");
 
-    // Artist
-    lv_obj_t* artist = lv_label_create(scr);
-    lv_label_set_text(artist, "Artist Name");
-    lv_obj_align(artist, LV_ALIGN_TOP_LEFT, 140, 110);
+    lv_obj_t* btn_plugins = lv_list_add_btn(list, LV_SYMBOL_DIRECTORY, "Plugins");  // better icon
 
-    // Progress Bar
-    lv_obj_t* progress = lv_bar_create(scr);
-    lv_obj_set_size(progress, 200, 10);
-    lv_obj_align(progress, LV_ALIGN_BOTTOM_MID, 0, -80);
-    lv_bar_set_value(progress, 30, LV_ANIM_OFF); // Example 30%
+    lv_obj_t* btn_system = lv_list_add_btn(list, LV_SYMBOL_SETTINGS, "System");
 
-    // Prev button
-    lv_obj_t* btn_prev = lv_btn_create(scr);
-    lv_obj_set_size(btn_prev, 50, 50);
-    lv_obj_align(btn_prev, LV_ALIGN_BOTTOM_LEFT, 20, -20);
-    lv_obj_t* label_prev = lv_label_create(btn_prev);
-    lv_label_set_text(label_prev, "<<");
-
-    // Play/Pause button
-    lv_obj_t* btn_play_pause = lv_btn_create(scr);
-    lv_obj_set_size(btn_play_pause, 50, 50);
-    lv_obj_align(btn_play_pause, LV_ALIGN_BOTTOM_MID, 0, -20);
-    lv_obj_t* label_play_pause = lv_label_create(btn_play_pause);
-    lv_label_set_text(label_play_pause, "||");
-
-    // Next button
-    lv_obj_t* btn_next = lv_btn_create(scr);
-    lv_obj_set_size(btn_next, 50, 50);
-    lv_obj_align(btn_next, LV_ALIGN_BOTTOM_RIGHT, -20, -20);
-    lv_obj_t* label_next = lv_label_create(btn_next);
-    lv_label_set_text(label_next, ">>");
+    // OPTIONAL: Simulate "selection" → style the first item
+    lv_obj_add_style(btn_files, &style_selected, LV_PART_MAIN);
 }

@@ -36,7 +36,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>LV_CONF_INCLUDE_SIMPLE;LV_LVGL_H_INCLUDE_SIMPLE;LV_USE_DEV_VERSION;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization Condition="'$(Configuration)'=='Release'">MinSpace</Optimization>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)\..\src\components</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)\..\src\components;$(ProjectDir)\..\src\audio_lib</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -629,8 +629,11 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\LvglPlatform\lvgl\src\widgets\tileview\lv_tileview_private.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\LvglPlatform\lvgl\src\widgets\win\lv_win.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\LvglPlatform\lvgl\src\widgets\win\lv_win_private.h" />
+    <ClInclude Include="audio.h" />
     <ClInclude Include="loading_screen.h" />
     <ClInclude Include="lv_conf.h" />
+    <ClInclude Include="miniaudio.h" />
+    <ClInclude Include="now_playing_screen.h" />
     <ClInclude Include="top_bar.h" />
     <ClInclude Include="ui.h" />
   </ItemGroup>
@@ -3622,8 +3625,10 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
+    <ClCompile Include="audio.c" />
     <ClCompile Include="loading_screen.c" />
     <ClCompile Include="LvglWindowsSimulator.cpp" />
+    <ClCompile Include="now_playing_screen.c" />
     <ClCompile Include="top_bar.c" />
     <ClCompile Include="ui.c" />
   </ItemGroup>

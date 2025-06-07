@@ -1,0 +1,108 @@
+﻿#define MINIAUDIO_IMPLEMENTATION
+#include "miniaudio.h"
+
+#include <stdio.h>
+#include <stdbool.h>
+
+static ma_decoder decoder;
+static ma_device device;
+static bool isPlaying = false;
+
+static void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
+{
+    ma_decoder* pDecoder = (ma_decoder*)pDevice->pUserData;
+    if (pDecoder == NULL)
+        return;
+
+    ma_uint64 framesRead;
+    ma_decoder_read_pcm_frames(pDecoder, pOutput, frameCount, &framesRead);
+
+    if (framesRead < frameCount)
+    {
+        // If less frames were read → fill rest with silence
+        ma_uint8* pRemaining = (ma_uint8*)pOutput + (framesRead * ma_get_bytes_per_frame(pDevice->playback.format, pDevice->playback.channels));
+        ma_uint64 remainingFrameCount = frameCount - framesRead;
+        ma_silence_pcm_frames(pRemaining, remainingFrameCount, pDevice->playback.format, pDevice->playback.channels);
+    }
+
+    (void)pInput;
+}
+
+void audio_init(void)
+{
+    // Nothing needed for now
+}
+
+void audio_play(const char* filePath)
+{
+    printf("Playing: %s\n", filePath);
+
+    // Stop previous device if playing
+    if (isPlaying)
+    {
+        ma_device_stop(&device);
+        ma_device_uninit(&device);
+        ma_decoder_uninit(&decoder);
+        isPlaying = false;
+    }
+
+    // Init decoder
+    if (ma_decoder_init_file(filePath, NULL, &decoder) != MA_SUCCESS)
+    {
+        printf("Failed to load file: %s\n", filePath);
+        return;
+    }
+
+    // Configure device
+    ma_device_config deviceConfig = ma_device_config_init(ma_device_type_playback);
+    deviceConfig.playback.format = decoder.outputFormat;
+    deviceConfig.playback.channels = decoder.outputChannels;
+    deviceConfig.sampleRate = decoder.outputSampleRate;
+    deviceConfig.dataCallback = data_callback;
+    deviceConfig.pUserData = &decoder;
+
+    // Init device
+    if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS)
+    {
+        printf("Failed to initialize device.\n");
+        ma_decoder_uninit(&decoder);
+        return;
+    }
+
+    // Start device
+    if (ma_device_start(&device) != MA_SUCCESS)
+    {
+        printf("Failed to start device.\n");
+        ma_device_uninit(&device);
+        ma_decoder_uninit(&decoder);
+        return;
+    }
+
+    isPlaying = true;
+}
+
+void audio_stop(void)
+{
+    if (isPlaying)
+    {
+        ma_device_stop(&device);
+        ma_device_uninit(&device);
+        ma_decoder_uninit(&decoder);
+        isPlaying = false;
+    }
+}
+
+void audio_toggle_pause(void)
+{
+    if (!isPlaying)
+        return;
+
+    if (ma_device_get_state(&device) == ma_device_state_started)
+    {
+        ma_device_stop(&device);
+    }
+    else
+    {
+        ma_device_start(&device);
+    }
+}

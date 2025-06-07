@@ -35,17 +35,26 @@ TopBarContext top_bar_create(lv_obj_t* parent)
 
     // Create container
     lv_obj_t* bar = lv_obj_create(parent);
-    lv_obj_set_size(bar, 320, 24);
+    lv_obj_set_size(bar, 320, 20);
     lv_obj_align(bar, LV_ALIGN_TOP_MID, 0, 0);
     lv_obj_set_style_bg_color(bar, lv_color_hex(0xFFFFFF), 0);
     lv_obj_set_style_border_width(bar, 0, 0);
+
+    // Add bottom border (debug only)
+    lv_obj_set_style_border_side(bar, LV_BORDER_SIDE_BOTTOM, 0);
+    lv_obj_set_style_border_width(bar, 1, 0);
+    lv_obj_set_style_border_color(bar, lv_color_hex(0xAAAAAA), 0);  // light gray line
+
+    // Disable scroll
+    lv_obj_clear_flag(bar, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(bar, LV_OBJ_FLAG_CLICK_FOCUSABLE);
 
     // Battery outline
     lv_obj_t* battery_outline = lv_obj_create(bar);
     lv_obj_remove_style_all(battery_outline);  // <--- SUPER important for clean rectangle!
 
-    lv_obj_set_size(battery_outline, 30, 14);
-    lv_obj_align(battery_outline, LV_ALIGN_RIGHT_MID, -10, 0);
+    lv_obj_set_size(battery_outline, 30, 10);
+    lv_obj_align(battery_outline, LV_ALIGN_RIGHT_MID, -2, 0);
     lv_obj_set_style_border_width(battery_outline, 2, 0);
     lv_obj_set_style_border_color(battery_outline, lv_color_hex(0x000000), 0);
     lv_obj_set_style_radius(battery_outline, 0, 0);
@@ -56,7 +65,7 @@ TopBarContext top_bar_create(lv_obj_t* parent)
 
     // Battery fill → store in context
     ctx.battery_fill = lv_obj_create(battery_outline);
-    lv_obj_set_size(ctx.battery_fill, 0, 10);  // Start 0%
+    lv_obj_set_size(ctx.battery_fill, 0, 6);  // Start 0%
     lv_obj_align(ctx.battery_fill, LV_ALIGN_LEFT_MID, 0, 0);
     lv_obj_set_style_bg_color(ctx.battery_fill, lv_color_hex(0x00FF00), 0);
     lv_obj_set_style_border_width(ctx.battery_fill, 0, 0);
@@ -65,14 +74,14 @@ TopBarContext top_bar_create(lv_obj_t* parent)
 
     // Battery head
     lv_obj_t* battery_head = lv_obj_create(bar);
-    lv_obj_set_size(battery_head, 4, 6);
+    lv_obj_set_size(battery_head, 2, 6);
     lv_obj_align_to(battery_head, battery_outline, LV_ALIGN_OUT_RIGHT_MID, 1, 0);
     lv_obj_set_style_bg_color(battery_head, lv_color_hex(0x000000), 0);
     lv_obj_set_style_border_width(battery_head, 0, 0);
 
     // Time label (left)
     ctx.time_label = lv_label_create(bar);
-    lv_obj_align(ctx.time_label, LV_ALIGN_LEFT_MID, 8, 0);
+    lv_obj_align(ctx.time_label, LV_ALIGN_LEFT_MID, 2, 0);
     update_time_label(ctx.time_label);  // Initialize text
 
     // Start or update the timer

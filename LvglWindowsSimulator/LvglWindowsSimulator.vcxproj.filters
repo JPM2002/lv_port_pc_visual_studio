@@ -1778,6 +1778,15 @@
     <ClInclude Include="ui.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="now_playing_screen.h">
+      <Filter>src\components\now_playing_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="miniaudio.h">
+      <Filter>src\audio_lib</Filter>
+    </ClInclude>
+    <ClInclude Include="audio.h">
+      <Filter>src\audio_lib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="LvglWindowsSimulator.manifest" />
@@ -4031,6 +4040,12 @@
     <ClCompile Include="ui.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="now_playing_screen.c">
+      <Filter>src\components\now_playing_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="audio.c">
+      <Filter>src\audio_lib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="freetype">
@@ -5394,6 +5409,12 @@
     </Filter>
     <Filter Include="src\components\top_bar">
       <UniqueIdentifier>{762fdb78-a104-4f7c-8b67-878748b03eb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\components\now_playing_screen">
+      <UniqueIdentifier>{1eb6eb83-c715-4665-800e-c246a4fb4a86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\audio_lib">
+      <UniqueIdentifier>{0d8f4e69-a766-4ce2-a565-b70ec57c1042}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
