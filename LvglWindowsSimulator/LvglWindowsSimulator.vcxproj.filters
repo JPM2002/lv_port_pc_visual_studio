@@ -1769,6 +1769,15 @@
       <Filter>lvgl\src\widgets\win</Filter>
     </ClInclude>
     <ClInclude Include="lv_conf.h" />
+    <ClInclude Include="loading_screen.h">
+      <Filter>src\components\loading_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="top_bar.h">
+      <Filter>src\components\top_bar</Filter>
+    </ClInclude>
+    <ClInclude Include="ui.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="LvglWindowsSimulator.manifest" />
@@ -4013,6 +4022,15 @@
       <Filter>lvgl\src\widgets\win</Filter>
     </ClCompile>
     <ClCompile Include="LvglWindowsSimulator.cpp" />
+    <ClCompile Include="loading_screen.c">
+      <Filter>src\components\loading_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="top_bar.c">
+      <Filter>src\components\top_bar</Filter>
+    </ClCompile>
+    <ClCompile Include="ui.c">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="freetype">
@@ -5364,6 +5382,18 @@
     </Filter>
     <Filter Include="lvgl\zephyr">
       <UniqueIdentifier>{e2b5f460-68ee-4ae1-b143-7367524c0b28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{72fee9df-1ec7-446f-a48e-14852ffb1ef9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\components">
+      <UniqueIdentifier>{f19a5f69-3199-4757-b053-a8fc6aaa1643}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\components\loading_screen">
+      <UniqueIdentifier>{e99b1239-b7ba-401b-ad37-1fafe5c8037f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\components\top_bar">
+      <UniqueIdentifier>{762fdb78-a104-4f7c-8b67-878748b03eb4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -14853,5 +14883,6 @@
     <None Include="$(MSBuildThisFileDirectory)..\LvglPlatform\lvgl\zephyr\module.yml">
       <Filter>lvgl\zephyr</Filter>
     </None>
+    <None Include="freetype.props" />
   </ItemGroup>
 </Project>
