@@ -241,16 +241,13 @@ static void scan_music_folder(void)
     }
 
     do {
-        char filenameA[MAX_PATH_LEN];
-        WideCharToMultiByte(CP_UTF8, 0, findFileData.cFileName, -1, filenameA, MAX_PATH_LEN, NULL, NULL);
-
-        snprintf(music_files[num_music_files], MAX_PATH_LEN, "%s", filenameA);
+        snprintf(music_files[num_music_files], MAX_PATH_LEN, "%s", findFileData.cFileName);
         num_music_files++;
 
         if (num_music_files >= MAX_MUSIC_FILES)
             break;
 
-    } while (FindNextFile(hFind, &findFileData) != 0);
+    } while (FindNextFileA(hFind, &findFileData) != 0);
 
     FindClose(hFind);
 }
