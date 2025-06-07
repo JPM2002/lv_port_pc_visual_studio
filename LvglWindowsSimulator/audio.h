@@ -8,6 +8,7 @@ extern "C" {
     void audio_play(const char* filePath);
     void audio_stop(void);
     void audio_toggle_pause(void);
+    bool audio_is_playing(void);
 
 #ifdef __cplusplus
 }

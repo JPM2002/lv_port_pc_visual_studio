@@ -6,8 +6,9 @@
 
 static ma_decoder decoder;
 static ma_device device;
-static bool isPlaying = false;
+static bool isPlaying = false;  // THIS is your master state
 
+// Data callback for device
 static void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
 {
     ma_decoder* pDecoder = (ma_decoder*)pDevice->pUserData;
@@ -81,6 +82,21 @@ void audio_play(const char* filePath)
     isPlaying = true;
 }
 
+void audio_toggle_pause(void)
+{
+    if (isPlaying)
+    {
+        // Pause = stop device but do not uninit
+        ma_device_stop(&device);
+        isPlaying = false;
+    }
+    else
+    {
+        ma_device_start(&device);
+        isPlaying = true;
+    }
+}
+
 void audio_stop(void)
 {
     if (isPlaying)
@@ -92,17 +108,7 @@ void audio_stop(void)
     }
 }
 
-void audio_toggle_pause(void)
+bool audio_is_playing(void)
 {
-    if (!isPlaying)
-        return;
-
-    if (ma_device_get_state(&device) == ma_device_state_started)
-    {
-        ma_device_stop(&device);
-    }
-    else
-    {
-        ma_device_start(&device);
-    }
+    return isPlaying;
 }

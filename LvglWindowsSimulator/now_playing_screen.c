@@ -1,9 +1,7 @@
-﻿#include "miniaudio.h"
-
-
-#include "lvgl/lvgl.h"
+﻿#include "lvgl/lvgl.h"
 #include "top_bar.h"
 #include "now_playing_screen.h"
+#include "audio.h"  // <== this is the correct include!
 
 #include <windows.h>
 #include <stdio.h>
@@ -17,22 +15,13 @@ static char music_files[MAX_MUSIC_FILES][MAX_PATH_LEN];
 static int num_music_files = 0;
 static int current_track_index = 0;
 
-static ma_decoder decoder;
-static ma_device device;
-static bool is_playing = false;
-
 // Forward declarations
 static void back_btn_event_cb(lv_event_t* e);
 static void play_pause_btn_event_cb(lv_event_t* e);
 static void next_btn_event_cb(lv_event_t* e);
 static void prev_btn_event_cb(lv_event_t* e);
 
-static void audio_play(const char* filepath);
-static void audio_stop(void);
-static void audio_toggle_pause(void);
-
 static void scan_music_folder(void);
-static void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount);
 
 // === Now Playing Screen ===
 void now_playing_screen_show(void)
@@ -149,7 +138,7 @@ static void play_pause_btn_event_cb(lv_event_t* e)
     lv_obj_t* label = (lv_obj_t*)lv_event_get_user_data(e);
     audio_toggle_pause();
 
-    if (is_playing)
+    if (audio_is_playing())
         lv_label_set_text(label, "❚❚");
     else
         lv_label_set_text(label, "▶");
@@ -167,62 +156,6 @@ static void prev_btn_event_cb(lv_event_t* e)
     audio_stop();
     current_track_index = (current_track_index - 1 + num_music_files) % num_music_files;
     now_playing_screen_show();
-}
-
-// === Audio functions ===
-static void audio_play(const char* filepath)
-{
-    ma_result result;
-
-    result = ma_decoder_init_file(filepath, NULL, &decoder);
-    if (result != MA_SUCCESS) {
-        printf("Failed to init decoder.\n");
-        return;
-    }
-
-    ma_device_config deviceConfig = ma_device_config_init(ma_device_type_playback);
-    deviceConfig.playback.format = decoder.outputFormat;
-    deviceConfig.playback.channels = decoder.outputChannels;
-    deviceConfig.sampleRate = decoder.outputSampleRate;
-    deviceConfig.dataCallback = data_callback;
-    deviceConfig.pUserData = &decoder;
-
-    result = ma_device_init(NULL, &deviceConfig, &device);
-    if (result != MA_SUCCESS) {
-        printf("Failed to init device.\n");
-        ma_decoder_uninit(&decoder);
-        return;
-    }
-
-    ma_device_start(&device);
-    is_playing = true;
-}
-
-static void audio_toggle_pause(void)
-{
-    if (is_playing) {
-        ma_device_stop(&device);
-        is_playing = false;
-    }
-    else {
-        ma_device_start(&device);
-        is_playing = true;
-    }
-}
-
-static void audio_stop(void)
-{
-    ma_device_uninit(&device);
-    ma_decoder_uninit(&decoder);
-    is_playing = false;
-}
-
-static void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
-{
-    ma_decoder* pDecoder = (ma_decoder*)pDevice->pUserData;
-    ma_decoder_read_pcm_frames(pDecoder, pOutput, frameCount, NULL);
-
-    (void)pInput;
 }
 
 // === Scan Folder ===
