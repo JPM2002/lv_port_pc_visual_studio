@@ -18,9 +18,12 @@ static char music_files[MAX_MUSIC_FILES][MAX_PATH_LEN];
 static int num_music_files = 0;
 static int current_track_index = 0;
 
-// UI globals
-static lv_obj_t* song_title_label;
-static lv_obj_t* artist_label;
+// At the top of the file (after the music_files global):
+static lv_obj_t* time_left;
+static lv_obj_t* time_right;
+static lv_obj_t* progress;
+static lv_timer_t* progress_timer;  // NEW → we will add a timer
+
 
 // Forward declarations
 static void back_btn_event_cb(lv_event_t* e);
@@ -29,7 +32,7 @@ static void next_btn_event_cb(lv_event_t* e);
 static void prev_btn_event_cb(lv_event_t* e);
 
 static void scan_music_folder(void);
-static void load_metadata_and_update_ui(const char* file_path);
+
 
 // === Now Playing Screen ===
 void now_playing_screen_show(void)
@@ -72,31 +75,31 @@ void now_playing_screen_show(void)
     lv_obj_align(album_art, LV_ALIGN_CENTER, 0, 0);
     lv_obj_set_style_bg_color(album_art, lv_color_hex(0xCCCCCC), 0);
 
-    // Song Title (global)
-    song_title_label = lv_label_create(scr);
-    lv_label_set_text(song_title_label, "Loading...");
-    lv_obj_set_style_text_font(song_title_label, &lv_font_montserrat_14, 0);
-    lv_obj_align(song_title_label, LV_ALIGN_TOP_MID, 0, 150);
+    // Song Title
+    lv_obj_t* song_title = lv_label_create(scr);
+    lv_label_set_text(song_title, music_files[current_track_index]);
+    lv_obj_set_style_text_font(song_title, &lv_font_montserrat_14, 0);
+    lv_obj_align(song_title, LV_ALIGN_TOP_MID, 0, 150);
 
-    // Artist (global)
-    artist_label = lv_label_create(scr);
-    lv_label_set_text(artist_label, "Loading...");
-    lv_obj_set_style_text_font(artist_label, &lv_font_montserrat_12, 0);
-    lv_obj_align(artist_label, LV_ALIGN_TOP_MID, 0, 165);
+    // Artist (placeholder)
+    lv_obj_t* artist = lv_label_create(scr);
+    lv_label_set_text(artist, "Unknown Artist");
+    lv_obj_set_style_text_font(artist, &lv_font_montserrat_12, 0);
+    lv_obj_align(artist, LV_ALIGN_TOP_MID, 0, 165);
 
     // Progress Bar
-    lv_obj_t* progress = lv_bar_create(scr);
+    progress = lv_bar_create(scr);
     lv_obj_set_size(progress, 180, 8);
     lv_obj_align(progress, LV_ALIGN_BOTTOM_MID, 0, -90);
     lv_bar_set_value(progress, 0, LV_ANIM_OFF);
 
     // Time Left
-    lv_obj_t* time_left = lv_label_create(scr);
+    time_left = lv_label_create(scr);
     lv_label_set_text(time_left, "00:00");
     lv_obj_align_to(time_left, progress, LV_ALIGN_OUT_LEFT_MID, -8, 0);
 
     // Time Right
-    lv_obj_t* time_right = lv_label_create(scr);
+    time_right = lv_label_create(scr);
     lv_label_set_text(time_right, "??:??");
     lv_obj_align_to(time_right, progress, LV_ALIGN_OUT_RIGHT_MID, 8, 0);
 
@@ -131,13 +134,43 @@ void now_playing_screen_show(void)
     char full_path[MAX_PATH_LEN];
     snprintf(full_path, MAX_PATH_LEN, "%s%s", MUSIC_FOLDER, music_files[current_track_index]);
     audio_play(full_path);
-    load_metadata_and_update_ui(full_path);
+
+    // Create timer to update progress
+    progress_timer = lv_timer_create([](lv_timer_t* t) {
+
+        int pos_ms = audio_get_position();
+        int len_ms = audio_get_length();
+
+        // Update time labels
+        int pos_sec = pos_ms / 1000;
+        int len_sec = len_ms / 1000;
+
+        char buf_left[16];
+        snprintf(buf_left, sizeof(buf_left), "%02d:%02d", pos_sec / 60, pos_sec % 60);
+        lv_label_set_text(time_left, buf_left);
+
+        char buf_right[16];
+        snprintf(buf_right, sizeof(buf_right), "%02d:%02d", len_sec / 60, len_sec % 60);
+        lv_label_set_text(time_right, buf_right);
+
+        // Update progress bar
+        int percent = (len_ms > 0) ? (pos_ms * 100) / len_ms : 0;
+        lv_bar_set_value(progress, percent, LV_ANIM_OFF);
+
+        }, 500, NULL);  // every 500 ms
+
 }
 
 // === Button Callbacks ===
 static void back_btn_event_cb(lv_event_t* e)
 {
     audio_stop();
+
+    if (progress_timer) {
+        lv_timer_del(progress_timer);
+        progress_timer = NULL;
+    }
+
     extern void ui_show_main_menu(void);
     ui_show_main_menu();
 }
@@ -156,6 +189,12 @@ static void play_pause_btn_event_cb(lv_event_t* e)
 static void next_btn_event_cb(lv_event_t* e)
 {
     audio_stop();
+
+    if (progress_timer) {
+        lv_timer_del(progress_timer);
+        progress_timer = NULL;
+    }
+
     current_track_index = (current_track_index + 1) % num_music_files;
     now_playing_screen_show();
 }
@@ -163,9 +202,16 @@ static void next_btn_event_cb(lv_event_t* e)
 static void prev_btn_event_cb(lv_event_t* e)
 {
     audio_stop();
+
+    if (progress_timer) {
+        lv_timer_del(progress_timer);
+        progress_timer = NULL;
+    }
+
     current_track_index = (current_track_index - 1 + num_music_files) % num_music_files;
     now_playing_screen_show();
 }
+
 
 // === Scan Folder ===
 static void scan_music_folder(void)
@@ -192,27 +238,4 @@ static void scan_music_folder(void)
     } while (FindNextFileA(hFind, &findFileData) != 0);
 
     FindClose(hFind);
-}
-
-// === Load Metadata and update UI ===
-static void load_metadata_and_update_ui(const char* file_path)
-{
-    TagLib::FileRef f(file_path);
-    if (!f.isNull() && f.tag()) {
-        TagLib::Tag* tag = f.tag();
-
-        const char* title = tag->title().isEmpty() ? "Unknown Title" : tag->title().toCString(true);
-        const char* artist = tag->artist().isEmpty() ? "Unknown Artist" : tag->artist().toCString(true);
-
-        lv_label_set_text(song_title_label, title);
-        lv_label_set_text(artist_label, artist);
-
-        printf("Title: %s\n", title);
-        printf("Artist: %s\n", artist);
-    }
-    else {
-        lv_label_set_text(song_title_label, "Unknown Title");
-        lv_label_set_text(artist_label, "Unknown Artist");
-        printf("Failed to read metadata.\n");
-    }
 }

@@ -1790,6 +1790,9 @@
     <ClInclude Include="audio_metadata.h">
       <Filter>src\metadata_lib</Filter>
     </ClInclude>
+    <ClInclude Include="my_montserrat_14.h">
+      <Filter>src\fonts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="LvglWindowsSimulator.manifest" />
@@ -4052,6 +4055,9 @@
       <Filter>src\metadata_lib</Filter>
     </ClCompile>
     <ClCompile Include="LvglWindowsSimulator.cpp" />
+    <ClCompile Include="..\..\..\..\..\Downloads\my_montserrat_14.c">
+      <Filter>src\fonts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="freetype">
@@ -5424,6 +5430,9 @@
     </Filter>
     <Filter Include="src\metadata_lib">
       <UniqueIdentifier>{921168ce-8620-47af-8847-6987cab8f401}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\fonts">
+      <UniqueIdentifier>{a6e7948c-c6b2-463c-8157-d3f6c5005b59}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

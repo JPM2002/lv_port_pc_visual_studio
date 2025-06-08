@@ -34,9 +34,9 @@
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>false</TreatWarningAsError>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>LV_CONF_INCLUDE_SIMPLE;LV_LVGL_H_INCLUDE_SIMPLE;LV_USE_DEV_VERSION;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>LV_CONF_INCLUDE_SIMPLE;LV_LVGL_H_INCLUDE_SIMPLE;LV_USE_DEV_VERSION;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MY_MONTSERRAT_14=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization Condition="'$(Configuration)'=='Release'">MinSpace</Optimization>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)\..\src\components;$(ProjectDir)\..\src\audio_lib;C:\Users\Javie\Downloads\taglib-2.1\taglib\toolkit;C:\Users\Javie\Downloads\taglib-2.1;C:\Users\Javie\Downloads\taglib-2.1\taglib;$(ProjectDir)\..\src\metadata_lib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)\..\src\components;$(ProjectDir)\..\src\audio_lib;C:\Users\Javie\Downloads\taglib-2.1\taglib\toolkit;C:\Users\Javie\Downloads\taglib-2.1;C:\Users\Javie\Downloads\taglib-2.1\taglib;$(ProjectDir)\..\src\metadata_lib;$(ProjectDir)\..\src\fonts</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Javie\Downloads\taglib-2.1\build_n\taglib\Debug</AdditionalLibraryDirectories>
@@ -641,6 +641,7 @@
     <ClInclude Include="loading_screen.h" />
     <ClInclude Include="lv_conf.h" />
     <ClInclude Include="miniaudio.h" />
+    <ClInclude Include="my_montserrat_14.h" />
     <ClInclude Include="now_playing_screen.h" />
     <ClInclude Include="top_bar.h" />
     <ClInclude Include="ui.h" />
@@ -3632,6 +3633,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\LvglPlatform\lvgl\src\widgets\win\lv_win.c">
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>Default</LanguageStandard>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Downloads\my_montserrat_14.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="audio.c" />
     <ClCompile Include="audio_metadata.cpp" />

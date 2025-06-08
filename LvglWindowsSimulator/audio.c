@@ -34,6 +34,26 @@ void audio_init(void)
     // Nothing needed for now
 }
 
+int audio_get_position()
+{
+    ma_uint64 frameCursorPos = 0;
+    ma_decoder_get_cursor_in_pcm_frames(&decoder, &frameCursorPos);  // Only 2 args for your version!
+    ma_uint64 sampleRate = decoder.outputSampleRate;
+
+    double pos_sec = (double)frameCursorPos / sampleRate;
+    return (int)(pos_sec * 1000.0);  // return in ms
+}
+
+int audio_get_length()
+{
+    ma_uint64 totalFrames = 0;
+    ma_decoder_get_length_in_pcm_frames(&decoder, &totalFrames);  // Only 2 args for your version!
+    ma_uint64 sampleRate = decoder.outputSampleRate;
+
+    double len_sec = (double)totalFrames / sampleRate;
+    return (int)(len_sec * 1000.0);  // return in ms
+}
+
 void audio_play(const char* filePath)
 {
     printf("Playing: %s\n", filePath);
