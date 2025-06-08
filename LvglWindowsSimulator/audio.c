@@ -4,9 +4,14 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+// Global state
 static ma_decoder decoder;
 static ma_device device;
-static bool isPlaying = false;  // THIS is your master state
+static bool isPlaying = false;
+
+// NEW → track position in callback
+volatile ma_uint64 g_lastPositionFrames = 0;
+static ma_uint64 g_totalFrames = 0;  // Cache length once
 
 // Data callback for device
 static void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
@@ -17,6 +22,9 @@ static void data_callback(ma_device* pDevice, void* pOutput, const void* pInput,
 
     ma_uint64 framesRead;
     ma_decoder_read_pcm_frames(pDecoder, pOutput, frameCount, &framesRead);
+
+    // Update global position safely
+    g_lastPositionFrames += framesRead;
 
     if (framesRead < frameCount)
     {
@@ -36,22 +44,22 @@ void audio_init(void)
 
 int audio_get_position()
 {
-    ma_uint64 frameCursorPos = 0;
-    ma_decoder_get_cursor_in_pcm_frames(&decoder, &frameCursorPos);  // Only 2 args for your version!
     ma_uint64 sampleRate = decoder.outputSampleRate;
 
-    double pos_sec = (double)frameCursorPos / sampleRate;
-    return (int)(pos_sec * 1000.0);  // return in ms
+    // Just read the global position
+    ma_uint64 posFrames = g_lastPositionFrames;
+
+    double pos_sec = (double)posFrames / sampleRate;
+    return (int)(pos_sec * 1000.0);  // ms
 }
 
 int audio_get_length()
 {
-    ma_uint64 totalFrames = 0;
-    ma_decoder_get_length_in_pcm_frames(&decoder, &totalFrames);  // Only 2 args for your version!
     ma_uint64 sampleRate = decoder.outputSampleRate;
 
-    double len_sec = (double)totalFrames / sampleRate;
-    return (int)(len_sec * 1000.0);  // return in ms
+    // Use cached length
+    double len_sec = (double)g_totalFrames / sampleRate;
+    return (int)(len_sec * 1000.0);  // ms
 }
 
 void audio_play(const char* filePath)
@@ -73,6 +81,13 @@ void audio_play(const char* filePath)
         printf("Failed to load file: %s\n", filePath);
         return;
     }
+
+    // Reset global playback state
+    g_lastPositionFrames = 0;
+
+    // Cache total frames
+    g_totalFrames = 0;
+    ma_decoder_get_length_in_pcm_frames(&decoder, &g_totalFrames);
 
     // Configure device
     ma_device_config deviceConfig = ma_device_config_init(ma_device_type_playback);
