@@ -1787,6 +1787,9 @@
     <ClInclude Include="audio.h">
       <Filter>src\audio_lib</Filter>
     </ClInclude>
+    <ClInclude Include="audio_metadata.h">
+      <Filter>src\metadata_lib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="LvglWindowsSimulator.manifest" />
@@ -4030,22 +4033,25 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\LvglPlatform\lvgl\src\widgets\win\lv_win.c">
       <Filter>lvgl\src\widgets\win</Filter>
     </ClCompile>
-    <ClCompile Include="LvglWindowsSimulator.cpp" />
     <ClCompile Include="loading_screen.c">
       <Filter>src\components\loading_screen</Filter>
     </ClCompile>
     <ClCompile Include="top_bar.c">
       <Filter>src\components\top_bar</Filter>
     </ClCompile>
-    <ClCompile Include="ui.c">
+    <ClCompile Include="ui.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="now_playing_screen.c">
+    <ClCompile Include="now_playing_screen.cpp">
       <Filter>src\components\now_playing_screen</Filter>
     </ClCompile>
     <ClCompile Include="audio.c">
       <Filter>src\audio_lib</Filter>
     </ClCompile>
+    <ClCompile Include="audio_metadata.cpp">
+      <Filter>src\metadata_lib</Filter>
+    </ClCompile>
+    <ClCompile Include="LvglWindowsSimulator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="freetype">
@@ -5415,6 +5421,9 @@
     </Filter>
     <Filter Include="src\audio_lib">
       <UniqueIdentifier>{0d8f4e69-a766-4ce2-a565-b70ec57c1042}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\metadata_lib">
+      <UniqueIdentifier>{921168ce-8620-47af-8847-6987cab8f401}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

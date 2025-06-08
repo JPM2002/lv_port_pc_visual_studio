@@ -3,6 +3,9 @@
 #include "now_playing_screen.h"
 #include "audio.h"  // <== this is the correct include!
 
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
+
 #include <windows.h>
 #include <stdio.h>
 
@@ -15,6 +18,10 @@ static char music_files[MAX_MUSIC_FILES][MAX_PATH_LEN];
 static int num_music_files = 0;
 static int current_track_index = 0;
 
+// UI globals
+static lv_obj_t* song_title_label;
+static lv_obj_t* artist_label;
+
 // Forward declarations
 static void back_btn_event_cb(lv_event_t* e);
 static void play_pause_btn_event_cb(lv_event_t* e);
@@ -22,6 +29,7 @@ static void next_btn_event_cb(lv_event_t* e);
 static void prev_btn_event_cb(lv_event_t* e);
 
 static void scan_music_folder(void);
+static void load_metadata_and_update_ui(const char* file_path);
 
 // === Now Playing Screen ===
 void now_playing_screen_show(void)
@@ -64,17 +72,17 @@ void now_playing_screen_show(void)
     lv_obj_align(album_art, LV_ALIGN_CENTER, 0, 0);
     lv_obj_set_style_bg_color(album_art, lv_color_hex(0xCCCCCC), 0);
 
-    // Song Title
-    lv_obj_t* song_title = lv_label_create(scr);
-    lv_label_set_text(song_title, music_files[current_track_index]);
-    lv_obj_set_style_text_font(song_title, &lv_font_montserrat_14, 0);
-    lv_obj_align(song_title, LV_ALIGN_TOP_MID, 0, 150);
+    // Song Title (global)
+    song_title_label = lv_label_create(scr);
+    lv_label_set_text(song_title_label, "Loading...");
+    lv_obj_set_style_text_font(song_title_label, &lv_font_montserrat_14, 0);
+    lv_obj_align(song_title_label, LV_ALIGN_TOP_MID, 0, 150);
 
-    // Artist (placeholder)
-    lv_obj_t* artist = lv_label_create(scr);
-    lv_label_set_text(artist, "Unknown Artist");
-    lv_obj_set_style_text_font(artist, &lv_font_montserrat_12, 0);
-    lv_obj_align(artist, LV_ALIGN_TOP_MID, 0, 165);
+    // Artist (global)
+    artist_label = lv_label_create(scr);
+    lv_label_set_text(artist_label, "Loading...");
+    lv_obj_set_style_text_font(artist_label, &lv_font_montserrat_12, 0);
+    lv_obj_align(artist_label, LV_ALIGN_TOP_MID, 0, 165);
 
     // Progress Bar
     lv_obj_t* progress = lv_bar_create(scr);
@@ -123,6 +131,7 @@ void now_playing_screen_show(void)
     char full_path[MAX_PATH_LEN];
     snprintf(full_path, MAX_PATH_LEN, "%s%s", MUSIC_FOLDER, music_files[current_track_index]);
     audio_play(full_path);
+    load_metadata_and_update_ui(full_path);
 }
 
 // === Button Callbacks ===
@@ -183,4 +192,27 @@ static void scan_music_folder(void)
     } while (FindNextFileA(hFind, &findFileData) != 0);
 
     FindClose(hFind);
+}
+
+// === Load Metadata and update UI ===
+static void load_metadata_and_update_ui(const char* file_path)
+{
+    TagLib::FileRef f(file_path);
+    if (!f.isNull() && f.tag()) {
+        TagLib::Tag* tag = f.tag();
+
+        const char* title = tag->title().isEmpty() ? "Unknown Title" : tag->title().toCString(true);
+        const char* artist = tag->artist().isEmpty() ? "Unknown Artist" : tag->artist().toCString(true);
+
+        lv_label_set_text(song_title_label, title);
+        lv_label_set_text(artist_label, artist);
+
+        printf("Title: %s\n", title);
+        printf("Artist: %s\n", artist);
+    }
+    else {
+        lv_label_set_text(song_title_label, "Unknown Title");
+        lv_label_set_text(artist_label, "Unknown Artist");
+        printf("Failed to read metadata.\n");
+    }
 }

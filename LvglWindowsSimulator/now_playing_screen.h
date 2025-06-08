@@ -1,12 +1,14 @@
-﻿#pragma once
+﻿#ifndef NOW_PLAYING_SCREEN_H
+#define NOW_PLAYING_SCREEN_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    // Main entry to show Now Playing screen
     void now_playing_screen_show(void);
 
 #ifdef __cplusplus
-}
+} /* extern "C" */
 #endif
+
+#endif // NOW_PLAYING_SCREEN_H
